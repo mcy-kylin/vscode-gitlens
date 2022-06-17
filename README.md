@@ -13,7 +13,7 @@
 
 <p align="center">
   <br />
-  <a title="What's New in GitLens 12" href="https://gitkraken.com/blog/gitlens-12"><img width="600px" src="./src/webviews/apps/media/gitlens-12-card.png" alt="Open What's New in GitLens 12" /></a>
+  <a title="Watch the GitLens Getting Started video" href="https://www.youtube.com/watch?v=UQPb73Zz9qk"><img width="600px" src="https://raw.githubusercontent.com/gitkraken/vscode-gitlens/main/src/webviews/apps/media/gitlens-tutorial-banner.png" alt="Watch the GitLens Getting Started video" /></a>
   <br/>
 </p>
 
@@ -614,9 +614,9 @@ The _Search & Compare_ view lists pinnable (saved) results for searching commit 
 
 ## Remote Provider Integrations [#](#remote-provider-integrations- 'Remote Provider Integrations')
 
-GitLens provides rich integrations with many remote providers, including GitHub, GitHub Enterprise, GitLab, Gitea, Gerrit, GoogleSource, Bitbucket, Bitbucket Server, and Azure DevOps. You can also define [custom remote providers](#remote-provider-integration-settings- 'Jump to the Remote Provider Integration settings') or [remote providers with custom domains](#remote-provider-integration-settings- 'Jump to the Remote Provider Integration settings') as well.
+GitLens provides integrations with many Git hosting services, including GitHub, GitHub Enterprise, GitLab, GitLab self-managed, Gitea, Gerrit, GoogleSource, Bitbucket, Bitbucket Server, and Azure DevOps. You can also define [custom remote providers](#remote-provider-integration-settings- 'Jump to the Remote Provider Integration settings') or [remote providers with custom domains](#remote-provider-integration-settings- 'Jump to the Remote Provider Integration settings') as well.
 
-Basic integrations provide issue and pull request auto-linking, while richer integrations (e.g. GitHub) can provide rich hover information provided for auto-linked issues and pull requests, associate pull requests with branches and commits, and provide avatars.
+All Git host integrations integrations provide issue and pull request auto-linking, while rich integrations (e.g. GitHub & GitLab) provide more detailed hover information for auto-linked issues and pull requests, pull requests associated with branches and commits, and avatars.
 
 Additionally, these integrations provide commands to copy the url of or open files, commits, branches, and the repository on the remote provider.
 
@@ -628,6 +628,7 @@ Additionally, these integrations provide commands to copy the url of or open fil
 - _Open Commit on Remote_ command (`gitlens.openCommitOnRemote`) &mdash; opens a commit on the remote provider
 - _Copy Remote Commit Url_ command (`gitlens.copyRemoteCommitUrl`) &mdash; copies the url of a commit on the remote provider
 - _Open Branch on Remote_ command (`gitlens.openBranchOnRemote`) &mdash; opens the branch on the remote provider
+- _Open Current Branch on Remote_ command (`gitlens.openCurrentBranchOnRemote`) &mdash; opens the current branch on the remote provider
 - _Copy Remote Branch Url_ command (`gitlens.copyRemoteBranchUrl`) &mdash; copies the url of a branch on the remote provider
 - _Open Branches on Remote_ command (`gitlens.openBranchesOnRemote`) &mdash; opens the branches on the remote provider
 - _Copy Remote Branches Url_ command (`gitlens.copyRemoteBranchesUrl`) &mdash; copies the url of the branches on the remote provider
@@ -1137,11 +1138,13 @@ A big thanks to the people that have contributed to this project:
 - Cédric Malard ([@cmalard](https://github.com/cmalard)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=cmalard)
 - Asif Kamran Malick ([@akmalick](https://github.com/akmalick)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=akmalick)
 - Sam Martin ([@smartinio](https://github.com/smartinio)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=smartinio)
+- mcy-kylin ([@mcy-kylin](https://github.com/mcy-kylin)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=mcy-kylin)
 - Mark Molinaro ([@markjm](https://github.com/markjm)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=markjm)
 - Ahmadou Waly Ndiaye ([@sir-kain](https://github.com/sir-kain)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=sir-kain)
 - Nguyen Long Nhat ([@torn4dom4n](https://github.com/torn4dom4n)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=torn4dom4n)
 - Aurelio Ogliari ([@nobitagit](https://github.com/nobitagit)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=nobitagit)
 - Raaj Patil ([@arrpee](https://github.com/arrpee)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=arrpee)
+- Kevin Paxton ([kpaxton](https://github.com/kpaxton)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=kpaxton)
 - Connor Peet ([@connor4312](https://github.com/connor4312)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=connor4312)
 - Maxim Pekurin ([@pmaxim25](https://github.com/pmaxim25)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=pmaxim25)
 - Leo Dan Peña ([@amouxaden](https://github.com/amouxaden)) &mdash; [contributions](https://github.com/gitkraken/vscode-gitlens/commits?author=amouxaden)

@@ -61,7 +61,23 @@ export class Autolinks implements Disposable {
 
 	private onConfigurationChanged(e?: ConfigurationChangeEvent) {
 		if (configuration.changed(e, 'autolinks')) {
-			this._references = this.container.config.autolinks ?? [];
+			const autolinks = configuration.get('autolinks');
+			// Since VS Code's configuration objects are live we need to copy them to avoid writing back to the configuration
+			this._references =
+				autolinks
+					?.filter(a => a.prefix && a.url)
+					/**
+					 * Only allow properties defined by {@link AutolinkReference}
+					 */
+					?.map(a => ({
+						prefix: a.prefix,
+						url: a.url,
+						title: a.title,
+						alphanumeric: a.alphanumeric,
+						ignoreCase: a.ignoreCase,
+						type: a.type,
+						description: a.description,
+					})) ?? [];
 		}
 	}
 
@@ -199,6 +215,7 @@ export class Autolinks implements Disposable {
 		issuesOrPullRequests?: Map<string, IssueOrPullRequest | PromiseCancelledError | undefined>,
 	): ref is CacheableAutolinkReference | DynamicAutolinkReference {
 		if (isDynamic(ref)) return true;
+		if (!ref.prefix || !ref.url) return false;
 
 		try {
 			if (ref.messageMarkdownRegex == null) {

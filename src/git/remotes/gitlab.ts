@@ -1,4 +1,4 @@
-import { AuthenticationSession, Range, Uri, window } from 'vscode';
+import { AuthenticationSession, Disposable, env, QuickInputButton, Range, ThemeIcon, Uri, window } from 'vscode';
 import type { Autolink, DynamicAutolinkReference } from '../../annotations/autolinks';
 import { AutolinkReference, AutolinkType } from '../../config';
 import { Container } from '../../container';
@@ -28,18 +28,12 @@ const rangeRegex = /^L(\d+)(?:-(\d+))?$/;
 const authProvider = Object.freeze({ id: 'gitlab', scopes: ['read_api', 'read_user', 'read_repository'] });
 
 export class GitLabRemote extends RichRemoteProvider {
-	private static authenticationProvider: GitLabAuthenticationProvider | undefined;
-
 	protected get authProvider() {
 		return authProvider;
 	}
 
 	constructor(domain: string, path: string, protocol?: string, name?: string, custom: boolean = false) {
 		super(domain, path, protocol, name, custom);
-
-		if (GitLabRemote.authenticationProvider == null) {
-			GitLabRemote.authenticationProvider = new GitLabAuthenticationProvider(Container.instance);
-		}
 	}
 
 	get apiBaseUrl() {
@@ -153,7 +147,7 @@ export class GitLabRemote extends RichRemoteProvider {
 			while (true) {
 				const subscription = await container.subscription.getSubscription();
 				if (subscription.account?.verified === false) {
-					const resend = { title: 'Resend verification email' };
+					const resend = { title: 'Resend Verification' };
 					const cancel = { title: 'Cancel', isCloseAffordance: true };
 					const result = await window.showWarningMessage(
 						`${title}\n\nYou must verify your GitLens+ account email address before you can continue.`,
@@ -189,7 +183,7 @@ export class GitLabRemote extends RichRemoteProvider {
 					void container.subscription.startPreviewTrial();
 					break;
 				} else if (subscription.account == null) {
-					const signIn = { title: 'Sign in to GitLens+' };
+					const signIn = { title: 'Sign In to GitLens+' };
 					const cancel = { title: 'Cancel', isCloseAffordance: true };
 					const result = await window.showWarningMessage(
 						`${title}\n\nDo you want to sign in to GitLens+?`,
@@ -204,7 +198,7 @@ export class GitLabRemote extends RichRemoteProvider {
 						}
 					}
 				} else {
-					const upgrade = { title: 'Upgrade your account' };
+					const upgrade = { title: 'Upgrade Account' };
 					const cancel = { title: 'Cancel', isCloseAffordance: true };
 					const result = await window.showWarningMessage(
 						`${title}\n\nDo you want to upgrade your account?`,
@@ -381,7 +375,7 @@ export class GitLabRemote extends RichRemoteProvider {
 		const [owner, repo] = this.splitPath();
 		const { include, ...opts } = options ?? {};
 
-		const GitLabMergeRequest = (await import(/* webpackChunkName: "gitlabl" */ '../../plus/gitlab/models'))
+		const GitLabMergeRequest = (await import(/* webpackChunkName: "gitlab" */ '../../plus/gitlab/models'))
 			.GitLabMergeRequest;
 		return (await Container.instance.gitlab)?.getPullRequestForBranch(this, accessToken, owner, repo, branch, {
 			...opts,
@@ -401,9 +395,15 @@ export class GitLabRemote extends RichRemoteProvider {
 	}
 }
 
-class GitLabAuthenticationProvider implements IntegrationAuthenticationProvider {
+export class GitLabAuthenticationProvider implements Disposable, IntegrationAuthenticationProvider {
+	private readonly _disposable: Disposable;
+
 	constructor(container: Container) {
-		container.context.subscriptions.push(container.integrationAuthentication.registerProvider('gitlab', this));
+		this._disposable = container.integrationAuthentication.registerProvider('gitlab', this);
+	}
+
+	dispose() {
+		this._disposable.dispose();
 	}
 
 	getSessionId(descriptor?: IntegrationAuthenticationSessionDescriptor): string {
@@ -413,13 +413,54 @@ class GitLabAuthenticationProvider implements IntegrationAuthenticationProvider 
 	async createSession(
 		descriptor?: IntegrationAuthenticationSessionDescriptor,
 	): Promise<AuthenticationSession | undefined> {
-		const token = await window.showInputBox({
-			ignoreFocusOut: true,
-			title: `GitLab Authentication${descriptor?.domain ? `  \u2022 ${descriptor.domain}` : ''}`,
-			password: true,
-			placeHolder: `Requires ${descriptor?.scopes.join(', ') ?? 'all'} scopes`,
-			prompt: 'Paste your GitLab Personal Access Token',
-		});
+		const input = window.createInputBox();
+		input.ignoreFocusOut = true;
+
+		const disposables: Disposable[] = [];
+
+		let token;
+		try {
+			const infoButton: QuickInputButton = {
+				iconPath: new ThemeIcon(`link-external`),
+				tooltip: 'Open Access Tokens page on GitLab',
+			};
+
+			token = await new Promise<string | undefined>(resolve => {
+				disposables.push(
+					input.onDidHide(() => resolve(undefined)),
+					input.onDidChangeValue(() => (input.validationMessage = undefined)),
+					input.onDidAccept(() => {
+						const value = input.value.trim();
+						if (!value) {
+							input.validationMessage = 'A personal access token is required';
+							return;
+						}
+
+						resolve(value);
+					}),
+					input.onDidTriggerButton(e => {
+						if (e === infoButton) {
+							void env.openExternal(
+								Uri.parse(
+									`https://${descriptor?.domain ?? 'gitlab.com'}/-/profile/personal_access_tokens`,
+								),
+							);
+						}
+					}),
+				);
+
+				input.password = true;
+				input.title = `GitLab Authentication${descriptor?.domain ? `  \u2022 ${descriptor.domain}` : ''}`;
+				input.placeholder = `Requires ${descriptor?.scopes.join(', ') ?? 'all'} scopes`;
+				input.prompt = 'Paste your GitLab Personal Access Token';
+				input.buttons = [infoButton];
+
+				input.show();
+			});
+		} finally {
+			input.dispose();
+			disposables.forEach(d => d.dispose());
+		}
 
 		if (!token) return undefined;
 
